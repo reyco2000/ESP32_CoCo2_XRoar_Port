@@ -1,4 +1,4 @@
-CoCo2_ESP32_Emulator - A port of XRoar (a Dragon/Tandy Coco emulator)
+CoCo2_ESP32_Emulator - A port of XRoar (of Coco2 emulator)
 Copyright (C) 2026 Reinaldo Torres (CoCoByte)
 Based on XRoar, Copyright (C) 2003-2014 Ciaran Anscomb <xroar@6809.org.uk>
 
