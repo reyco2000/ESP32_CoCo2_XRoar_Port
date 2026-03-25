@@ -12,13 +12,13 @@ A full **TRS-80 Color Computer 2 (CoCo 2)** emulator running on an ESP32-S3 micr
 - **SAM6883** address multiplexer for memory mapping and video control
 - **WD1793 floppy disk controller** with .DSK and .VDK image support
 - **USB HID keyboard** input via ESP32-S3 native USB host
-- **Dual analog joysticks** with button support
+- **Original CoCo Dual analog joysticks** with button support
 - **On-Screen Display (OSD)** supervisor for disk mounting, machine reset, and status
 - **PSRAM disk caching** — entire disk images loaded into PSRAM for zero-latency access
 - **Multiple display support** — ILI9341, ST7789, or ST7796 SPI TFT panels
 - **Audio output** via DAC or I2S
 - **64 KB RAM**, configurable to 16/32/64 KB
-- **25 FPS**, cunrrely redeting 25 FPS on TFT display
+- **25 FPS**, currently rendering 25 FPS on TFT display
 
 ## Hardware Requirements
 
@@ -191,13 +191,14 @@ Edit `config.h` to match your hardware:
 - `PIN_*` constants — adjust if your wiring differs
 - `RAM_SIZE_KB` — 16, 32, or 64
 
-**Replace User_config.h with templates based on display type**
+Under Arduino1.8.19\libraries\TFT_eSPI **Replace User_Setup.h with templates based on display type** see folder /templates_for_TFT_eSP
 
 ### 6. Compile & Upload
 
 - **Sketch > Verify/Compile** to build
 - **Sketch > Upload** via USB
 - Open **Serial Monitor at 115200 baud** to see startup diagnostics
+
 
 ## Keyboard Controls
 
@@ -296,6 +297,7 @@ src/
 ## Known Limitations
 
 - No TFT framebuffer readback (no MISO) — brief black flash when closing OSD
+- CoCo Joystic uses 
 - DMK disk format is recognized but not mountable
 - Max 128 file entries in the SD card browser
 - Machine selection is fixed to CoCo 2 (Dragon/CoCo 1 stubs only)
