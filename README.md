@@ -63,6 +63,11 @@ A full **TRS-80 Color Computer 2 (CoCo 2)** emulator running on an ESP32-S3 micr
                           |                      |
                           |   [UART]     [USB]   |
                           +---|====|-----|====|--+
+                                            |
+                                     Connect USB Keyboard here
+(Due to power consumption I have used a USB Dongle keyboard that uses less power)
+
+
                 TFT ST7789 Display                          SD Card Module
              +----------------------+                  +----------------------+
              |                      |                  |                      |
@@ -79,6 +84,7 @@ A full **TRS-80 Color Computer 2 (CoCo 2)** emulator running on an ESP32-S3 micr
              |   [ LCD SCREEN ]     |                  |                      |
              |                      |                  |                      |
              +----------------------+                  +----------------------+
+
                   Joystick 1                                Joystick 2
              +----------------------+                  +----------------------+
              |                      |                  |                      |
