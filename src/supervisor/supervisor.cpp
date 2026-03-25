@@ -197,45 +197,123 @@ static const unsigned char bitmap_cocobyte[] PROGMEM = {
 #define LOGO_H  12
 #define LOGO_ROW_BYTES  12  // ceil(91/8)
 
-// Draw monochrome bitmap to TFT in the given color (set bits = pixel on)
-static void draw_mono_bitmap(TFT_eSPI* tft, int x0, int y0,
-                             const unsigned char* bmp, int w, int h,
-                             uint16_t color) {
+// Draw monochrome XBM bitmap scaled to TFT (set bits = pixel on)
+static void draw_mono_bitmap_scaled(TFT_eSPI* tft, int x0, int y0,
+                                    const unsigned char* bmp, int w, int h,
+                                    int scale, uint16_t color) {
     tft->startWrite();
     for (int row = 0; row < h; row++) {
         for (int col = 0; col < w; col++) {
             uint8_t b = pgm_read_byte(&bmp[row * LOGO_ROW_BYTES + (col >> 3)]);
             if (b & (1 << (col & 7))) {  // XBM format: LSB first
-                tft->drawPixel(x0 + col, y0 + row, color);
+                if (scale == 1) {
+                    tft->drawPixel(x0 + col, y0 + row, color);
+                } else {
+                    tft->fillRect(x0 + col * scale, y0 + row * scale,
+                                  scale, scale, color);
+                }
             }
         }
     }
     tft->endWrite();
 }
 
+// About screen color palette
+#define ABOUT_GREEN      0x07E0  // Pure green
+#define ABOUT_DK_GREEN   0x03A0  // Dark green (decorative lines)
+#define ABOUT_CYAN       0x07FF  // Cyan accent
+#define ABOUT_AMBER      0xFBE0  // Warm amber for version
+
 static void about_render(Supervisor_t* s) {
-    sv_render_frame("About", "ESC=Back");
-
-    // Draw logo centered at item row 0
     TFT_eSPI* tft = hal_video_get_tft();
-    if (tft) {
-        int logo_x = SV_BORDER_X + (SV_BORDER_W - LOGO_W) / 2;
-        int logo_y = SV_CONTENT_Y + (SV_ITEM_H - LOGO_H) / 2;
-        draw_mono_bitmap(tft, logo_x, logo_y, bitmap_cocobyte,
-                         LOGO_W, LOGO_H, 0x07E0); // Green
-    }
+    if (!tft) return;
 
-    sv_render_centered_item(1, "CoCo2 Emulator for the ESP32", 0x07E0); // Green
-    sv_render_centered_item(2, "Reinaldo Torres (C) 2026",    SV_COLOR_TEXT);
-    sv_render_centered_item(3, "",                            SV_COLOR_TEXT);
-    sv_render_centered_item(4, "Based on XRoar by Ciaran Anscomb", SV_COLOR_DIM);
-    sv_render_centered_item(5, "",                            SV_COLOR_TEXT);
-    sv_render_centered_item(6, "Version Beta 1.0 Build 22.03.2026", SV_COLOR_TEXT);
+    // Use the standard frame but with custom title
+    sv_render_frame("About", "ESC = Back");
 
-    // Show free heap
-    char heap[32];
-    snprintf(heap, sizeof(heap), "Free: %dK", ESP.getFreeHeap() / 1024);
-    sv_render_centered_item(7, heap, SV_COLOR_DIM);
+    tft->startWrite();
+
+    // --- Layout constants (pixel positions within the OSD frame) ---
+    const int cx  = SV_BORDER_X + SV_BORDER_W / 2;  // horizontal center
+    const int x1  = SV_BORDER_X + 6;                 // left margin
+    const int x2  = SV_BORDER_X + SV_BORDER_W - 6;  // right margin
+    const int top = SV_CONTENT_Y + 2;                // top of content area
+
+    // --- Row 1: Logo (scaled 2x = 182x24) centered with green tint bg ---
+    const int logo_scale = 2;
+    const int logo_sw = LOGO_W * logo_scale;  // 182
+    const int logo_sh = LOGO_H * logo_scale;  // 24
+    const int logo_x = cx - logo_sw / 2;
+    const int logo_y = top;
+
+    // Subtle dark background behind logo
+    tft->fillRect(logo_x - 4, logo_y - 2, logo_sw + 8, logo_sh + 4, 0x0120);
+    tft->drawRect(logo_x - 4, logo_y - 2, logo_sw + 8, logo_sh + 4, ABOUT_DK_GREEN);
+
+    tft->endWrite();
+
+    // Draw logo (has its own startWrite/endWrite)
+    draw_mono_bitmap_scaled(tft, logo_x, logo_y, bitmap_cocobyte,
+                            LOGO_W, LOGO_H, logo_scale, ABOUT_GREEN);
+
+    tft->startWrite();
+
+    // --- Row 2: Project subtitle ---
+    int y = logo_y + logo_sh + 8;
+    tft->setTextFont(1);  // 8px font for subtitle
+    tft->setTextColor(ABOUT_CYAN, SV_COLOR_BG);
+    tft->setTextDatum(TC_DATUM);
+    tft->drawString("CoCo 2 Emulator for the ESP32-S3", cx, y);
+
+    // --- Decorative separator ---
+    y += 14;
+    tft->drawFastHLine(x1 + 20, y, (x2 - x1) - 40, ABOUT_DK_GREEN);
+    tft->drawPixel(x1 + 18, y, ABOUT_GREEN);
+    tft->drawPixel(x2 - 18, y, ABOUT_GREEN);
+
+    // --- Row 3: Copyright ---
+    y += 8;
+    tft->setTextFont(1);
+    tft->setTextColor(SV_COLOR_TEXT, SV_COLOR_BG);
+    tft->setTextDatum(TC_DATUM);
+    tft->drawString("(C) 2026 Reinaldo Torres", cx, y);
+
+    // --- Row 4: XRoar credit ---
+    y += 12;
+    tft->setTextColor(SV_COLOR_DIM, SV_COLOR_BG);
+    tft->drawString("Based on XRoar by Ciaran Anscomb", cx, y);
+
+    // --- Row 5: Claude credit ---
+    y += 12;
+    tft->setTextColor(SV_COLOR_DIM, SV_COLOR_BG);
+    tft->drawString("Co-developed with Claude Code", cx, y);
+
+    // --- Decorative separator ---
+    y += 12;
+    tft->drawFastHLine(x1 + 20, y, (x2 - x1) - 40, ABOUT_DK_GREEN);
+    tft->drawPixel(x1 + 18, y, ABOUT_GREEN);
+    tft->drawPixel(x2 - 18, y, ABOUT_GREEN);
+
+    // --- Row 6: Version badge ---
+    y += 6;
+    const char* ver_str = "Beta 1.0  Build 25.03.2026";
+    int ver_w = tft->textWidth(ver_str) + 16;
+    int ver_x = cx - ver_w / 2;
+    tft->fillRect(ver_x, y, ver_w, 13, 0x0120);
+    tft->drawRect(ver_x, y, ver_w, 13, ABOUT_DK_GREEN);
+    tft->setTextColor(ABOUT_AMBER, 0x0120);
+    tft->drawString(ver_str, cx, y + 3);
+
+    // --- Row 7: System stats ---
+    y += 20;
+    char stats[64];
+    snprintf(stats, sizeof(stats), "Heap:%dK  PSRAM:%dK",
+             ESP.getFreeHeap() / 1024, ESP.getFreePsram() / 1024);
+    tft->setTextColor(ABOUT_DK_GREEN, SV_COLOR_BG);
+    tft->drawString(stats, cx, y);
+
+    tft->setTextDatum(TL_DATUM);
+    tft->endWrite();
 }
 
 // ============================================================
