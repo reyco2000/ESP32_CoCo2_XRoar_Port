@@ -2,7 +2,7 @@
 
 A full **TRS-80 Color Computer 2 (CoCo 2)** emulator running on an ESP32-S3 microcontroller. Ported from the [XRoar](http://www.6809.org.uk/xroar/) emulator by Ciaran Anscomb.
 
-**Beta-1 — March 2026**
+**Beta-2 — March 26 2026**
 
 ## Features
 
