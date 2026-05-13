@@ -314,7 +314,7 @@ src/
 
 ## Credits
 
-- **Reinaldo Torres / CoCo Byte Club** — ESP32 port and hardware design
+- **Reinaldo Torres / CoCo Byte Club** — ESP32 port and hardware design ##Email chipshift@cocobyte.co
 - **Ciaran Anscomb** — [XRoar](http://www.6809.org.uk/xroar/) CoCo/Dragon emulator (original source)
 - **Claude Code (Anthropic)** — co-development of the ESP32 port
 - **Bodmer** — [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) display library
@@ -323,4 +323,6 @@ src/
 ## License
 
 This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
+##Email chipshift@cocobyte.co
+
 
