@@ -323,6 +323,10 @@ src/
 ## License
 
 This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
-##Email chipshift@cocobyte.co
+
+## Contact
+Reinaldo Torres — chipshift@cocobyte.co
+GitHub: [@reyco2000](https://github.com/reyco2000)
+
 
 
